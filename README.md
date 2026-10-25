@@ -2,6 +2,27 @@
 
 Find posters, textless key art, backdrops, logos and press assets for movies and TV shows.
 
+![Artwork Finder: all artwork for a title from 13 sources](docs/screenshots/title.jpg)
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/gallery.jpg" alt="Gallery with type and source filters, Low/Good/Great quality badges and grouped duplicates"></td>
+    <td width="50%"><img src="docs/screenshots/viewer.jpg" alt="Image viewer with size, quality rating, download and reverse image search"></td>
+  </tr>
+  <tr>
+    <td><b>Gallery:</b> filter by type and source, see quality for your poster size, duplicates grouped.</td>
+    <td><b>Viewer:</b> full size, click to zoom, download or reverse-search for a bigger copy.</td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/home.jpg" alt="Home page with recently viewed titles"></td>
+    <td width="50%"><img src="docs/screenshots/settings.jpg" alt="Settings with API keys, poster size and sources"></td>
+  </tr>
+  <tr>
+    <td><b>Home:</b> recently viewed titles and searches.</td>
+    <td><b>Settings:</b> API keys, your poster size, and which sources to use.</td>
+  </tr>
+</table>
+
 ## Install with Docker
 
 You need Docker: [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows, or Docker with the Compose plugin on Linux or a NAS.
