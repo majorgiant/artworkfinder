@@ -2,7 +2,8 @@
 #
 #   docker compose up -d
 #
-# then open http://localhost:4321. Update later with:  docker compose pull && docker compose up -d
+# then open http://localhost:4321 and add your API keys under the gear icon (Settings).
+# Update later with:  docker compose pull && docker compose up -d
 #
 # (In a copy of the code, docker-compose.override.yml is picked up automatically and builds the
 # image from that code instead: docker compose up -d --build)
@@ -11,21 +12,14 @@ services:
     image: ghcr.io/majorgiant/artworkfinder:latest
     container_name: artworkfinder
     ports:
-      # Change the first number to use another port, e.g. "8080:4321".
-      - "${PORT:-4321}:4321"
+      # Left number = the port you open in your browser. For another port, e.g. 8080,
+      # make it "8080:4321" and open http://localhost:8080.
+      - "4321:4321"
     volumes:
-      # Your keys, settings, history and caches. Keep this folder private.
+      # Your API keys, settings, history and caches. Keep this folder private.
       - ./data:/data
-    # Keys can also go in a .env file next to this one (see .env.example) or in the app's
-    # Settings (gear icon). Keys saved in Settings win over these.
-    environment:
-      TMDB_KEY: ${TMDB_KEY:-}
-      FANART_KEY: ${FANART_KEY:-}
-      TVDB_KEY: ${TVDB_KEY:-}
-      TVDB_PIN: ${TVDB_PIN:-}
-      SERPAPI_KEY: ${SERPAPI_KEY:-}
-      # User and group the app runs as and that owns ./data. 1000 suits most Linux machines;
-      # on a NAS set your own IDs (e.g. Unraid: 99 and 100).
-      PUID: ${PUID:-1000}
-      PGID: ${PGID:-1000}
+    # Only needed on a NAS that expects other user IDs (Unraid: 99 and 100). Remove the # signs:
+    # environment:
+    #   PUID: 99
+    #   PGID: 100
     restart: unless-stopped

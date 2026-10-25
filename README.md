@@ -63,7 +63,7 @@ All free. Only TMDB is really needed; the others add more artwork.
 | TheTVDB | [thetvdb.com/api-information](https://thetvdb.com/api-information) | More posters, backgrounds, season posters and logos |
 | SerpAPI | [serpapi.com](https://serpapi.com) | Google Images results inside the app (each search uses one credit) |
 
-Add them in the app's Settings (gear icon), or copy `.env.example` to `.env`, fill it in and run `docker compose up -d` again. Keys saved in Settings win over `.env`.
+Add them in the app's Settings (gear icon). They're saved in the `data` folder, so they survive restarts and updates.
 
 Without any keys the app still searches TV shows (through TVmaze) and loads artwork from the streaming services and poster sites.
 
@@ -71,8 +71,8 @@ Without any keys the app still searches TV shows (through TVmaze) and loads artw
 
 - **Stop:** `docker compose down`. **Start again:** `docker compose up -d`.
 - **Logs:** `docker compose logs -f`.
-- **Other port:** set `PORT=8080` in `.env` (or edit `docker-compose.yml`), then `docker compose up -d`.
-- **Linux or NAS user IDs:** the app runs as user and group `1000` and makes the `data` folder its own at startup. On a NAS that expects other IDs, set `PUID` and `PGID` in `.env` (find yours with `id`; Unraid uses `99` and `100`).
+- **Other port:** in `docker-compose.yml`, change `"4321:4321"` to e.g. `"8080:4321"` (the left number is the port you open in your browser), then run `docker compose up -d`.
+- **Linux or NAS user IDs:** the app runs as user and group `1000` and makes the `data` folder its own at startup. On a NAS that expects other IDs, remove the `#` signs in front of the `environment`, `PUID` and `PGID` lines in `docker-compose.yml` and fill in yours (find them with `id`; Unraid uses `99` and `100`).
 
 ### Your data
 
