@@ -37,6 +37,8 @@ function route() {
   const parts = (path || '/').split('/').filter(Boolean);
   if (!lb.hidden) closeLightbox();
   $('#selectionBar')?.remove();
+  pendingRedraw = null;
+  $('#updatesReady')?.remove();
   window.scrollTo(0, 0);
   if (parts[0] === 'search') return renderSearch(params.get('q') || '');
   if (parts[0] === 'title') return renderTitle(parts[1], parts[2]);
@@ -365,7 +367,7 @@ async function searchGoogle(query) {
     const r = await api(`/api/provider?name=google&${providerParams(t)}&q=${encodeURIComponent(query)}`);
     state.providers.google = { name: 'Google', status: r.images.length ? 'ok' : 'none', count: r.images.length, note: r.note };
     state.kind = 'web';
-    addImages(r.images);
+    addImages(r.images, null, true);
   } catch (e) {
     state.providers.google = { name: 'Google', status: 'error', note: e.message };
     drawProviderBar();
@@ -374,6 +376,7 @@ async function searchGoogle(query) {
 }
 
 function drawArtwork() {
+  if (pendingRedraw === 'artwork') pendingRedraw = null;
   const body = $('#tabBody');
   const t = state.title;
   // Type buttons count images from the selected source, and source buttons count images of the
@@ -479,19 +482,67 @@ function drawArtwork() {
   if (col) col.onclick = async () => {
     col.disabled = true; col.textContent = 'Loading…';
     const { images } = await api(`/api/collection?id=${t.collection.id}`);
-    addImages(images);
+    addImages(images, null, true);
   };
   drawGallery();
 }
 
-function addImages(images, focusKind) {
+// now: the user asked for these (season posters, collection, Google), so show them right away.
+function addImages(images, focusKind, now = !!focusKind) {
   const key = i => i.kind + i.url;
   const seen = new Set(state.images.map(key));
   state.images.push(...images.filter(i => !seen.has(key(i))));
   if (focusKind) state.kind = focusKind;
   drawProviderBar();
-  if (state.tab === 'art') drawArtwork();
+  if (now) { if (state.tab === 'art') drawArtwork(); } else requestRedraw('artwork');
 }
+
+// ---------------------------------------------------------------------------
+// Background updates (new sources, sizes, duplicate groups) never move the gallery while you're
+// scrolled into it or looking at an image: they wait behind an "Updates ready" button, and are
+// applied when you click it, scroll back to the top, or change a filter.
+// ---------------------------------------------------------------------------
+let pendingRedraw = null; // 'artwork' (toolbar + gallery) or 'gallery'
+
+function viewingGallery() {
+  if (!lb.hidden) return true;
+  const g = $('#gallery');
+  return !!g && g.getBoundingClientRect().top < $('.topbar').offsetHeight - 20;
+}
+
+function requestRedraw(kind) {
+  if (state.tab !== 'art' || !$('#tabBody')) return;
+  pendingRedraw = pendingRedraw === 'artwork' || kind === 'artwork' ? 'artwork' : 'gallery';
+  if (viewingGallery()) { showUpdatesButton(); return; }
+  applyPendingRedraw();
+}
+
+function applyPendingRedraw() {
+  const kind = pendingRedraw;
+  pendingRedraw = null;
+  showUpdatesButton();
+  if (kind === 'artwork') drawArtwork(); else if (kind) drawGallery();
+}
+
+function showUpdatesButton() {
+  let b = $('#updatesReady');
+  if (!pendingRedraw || state.tab !== 'art') { b?.remove(); return; }
+  if (b) return;
+  b = document.createElement('button');
+  b.id = 'updatesReady';
+  b.className = 'updates-ready';
+  b.textContent = 'Updates ready · Show';
+  b.title = 'New images, sizes or grouped duplicates came in while you were scrolling';
+  b.onclick = applyPendingRedraw;
+  document.body.appendChild(b);
+}
+
+let scrollTick = false;
+window.addEventListener('scroll', () => {
+  if (!pendingRedraw || scrollTick) return;
+  scrollTick = true;
+  requestAnimationFrame(() => { scrollTick = false; if (pendingRedraw && !viewingGallery()) applyPendingRedraw(); });
+}, { passive: true });
 
 // ---------------------------------------------------------------------------
 // Quality for your poster size
@@ -541,9 +592,10 @@ async function measure(list) {
       const batch = list.slice(n, n + size);
       const sizes = await api('/api/sizes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ urls: batch.map(i => i.url) }) }).catch(() => ({}));
       for (const i of batch) if (sizes[i.url]) { [i.width, i.height] = sizes[i.url]; i.measured = true; }
+      refreshCards();
+      if (state.sort === 'size' || state.minSize !== '0') redrawSoon();
       done += batch.length;
       progress('sizes', done < todo.length ? `Measuring sizes ${done}/${todo.length}…` : '');
-      redrawSoon();
     }
   };
   progress('sizes', `Measuring sizes 0/${todo.length}…`);
@@ -647,7 +699,25 @@ function progress(key, text) {
 let redrawTimer = null;
 function redrawSoon() {
   clearTimeout(redrawTimer);
-  redrawTimer = setTimeout(() => { if (state.tab === 'art' && $('#gallery')) drawGallery(); }, 700);
+  redrawTimer = setTimeout(() => requestRedraw('gallery'), 700);
+}
+
+// Fills newly measured sizes into the cards on screen without re-laying out the gallery.
+function refreshCards() {
+  const g = $('#gallery');
+  if (!g || !state.shown) return;
+  for (const el of g.querySelectorAll('.card[data-key]')) {
+    const box = el.querySelector('.img');
+    const s = state.shown[+box.dataset.n];
+    if (!s || s.i.url !== el.dataset.key || !s.i.width) continue;
+    const i = s.i, q = quality(i);
+    const badge = box.querySelector('.badge.quality');
+    const html = `<span class="badge quality ${q.level}" title="${esc(q.note)}">${q.label}</span>`;
+    if (badge) badge.outerHTML = html; else box.insertAdjacentHTML('beforeend', html);
+    el.querySelector('.dims').textContent = `${i.width}×${i.height}${i.votes ? ` · ♥ ${i.votes}` : ''}`;
+    const dl = el.querySelector('a[title="Download original"]');
+    if (dl) dl.href = downloadUrl(i);
+  }
 }
 
 function drawGallery() {
@@ -682,6 +752,9 @@ function drawGallery() {
   }
   state.filtered = shown.map(s => s.i);
   state.groups = groups;
+  state.shown = shown;
+  if (pendingRedraw === 'gallery') pendingRedraw = null;
+  showUpdatesButton();
 
   const btn = $('#selectAll');
   if (btn) {
@@ -709,6 +782,10 @@ function drawGallery() {
     card(i, n, group, member)).join('');
   const again = anchorKey && [...g.querySelectorAll('.card')].find(c => c.dataset.key === anchorKey);
   if (again) scrollBy(0, again.getBoundingClientRect().top - anchorY); else scrollTo(0, y);
+  bindCards(g);
+}
+
+function bindCards(g) {
   g.querySelectorAll('.img').forEach(el => el.onclick = e => {
     if (e.target.closest('.pick, .versions')) return;
     openLightbox(+el.dataset.n);
@@ -937,7 +1014,10 @@ function openLightbox(n) {
   bindZoom($('.stage', lb), full);
   document.body.classList.add('no-scroll');
 }
-function closeLightbox() { lb.hidden = true; lb.innerHTML = ''; document.body.classList.remove('no-scroll'); }
+function closeLightbox() {
+  lb.hidden = true; lb.innerHTML = ''; document.body.classList.remove('no-scroll');
+  if (pendingRedraw && !viewingGallery()) applyPendingRedraw();
+}
 
 // Click the image to toggle between fit-to-screen and 100%; at 100% scroll or drag to pan.
 function bindZoom(stage, img) {

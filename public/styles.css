@@ -184,6 +184,9 @@ a.pill:hover { border-color: var(--accent); }
 .card .versions { position: absolute; right: 8px; bottom: 8px; padding: 3px 9px; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; background: rgba(0,0,0,.72); font-size: 11px; font-weight: 600; cursor: pointer; }
 .card .versions:hover { border-color: var(--accent); color: var(--accent); }
 .card.member { border-style: dashed; opacity: .92; }
+.updates-ready { position: fixed; left: 50%; top: 84px; transform: translateX(-50%); z-index: 35; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 999px; background: var(--panel-2); color: var(--text); font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+.updates-ready:hover { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 720px) { .updates-ready { top: 120px; } }
 .selection-bar strong { white-space: nowrap; }
 .selection-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,.6); }
 .empty { padding: 40px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius); }
