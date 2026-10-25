@@ -180,7 +180,9 @@ async function streamZip(res, files, zipName) {
 // gallery and the duplicate check never hit the site in bursts.
 function thumbCache(dir) {
   const root = path.join(dir, 'thumbs');
-  fs.mkdirSync(root, { recursive: true });
+  // Without write access the cache is skipped: thumbnails are then fetched fresh each time.
+  let writable = true;
+  try { fs.mkdirSync(root, { recursive: true }); } catch { writable = false; }
   const pending = new Map();
   async function get(url) {
     const file = path.join(root, crypto.createHash('sha1').update(url).digest('hex'));
@@ -191,8 +193,10 @@ function thumbCache(dir) {
         const type = res.headers.get('content-type') || '';
         if (!res.ok || !type.startsWith('image/')) { res.body?.cancel().catch(() => {}); return null; }
         const body = Buffer.from(await res.arrayBuffer());
-        await fs.promises.writeFile(file, body);
-        await fs.promises.writeFile(file + '.type', type);
+        if (writable) {
+          await fs.promises.writeFile(file, body).catch(() => {});
+          await fs.promises.writeFile(file + '.type', type).catch(() => {});
+        }
         return { body, type };
       })().finally(() => pending.delete(url)));
     }

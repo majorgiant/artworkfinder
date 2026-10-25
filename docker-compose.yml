@@ -24,4 +24,8 @@ services:
       TVDB_KEY: ${TVDB_KEY:-}
       TVDB_PIN: ${TVDB_PIN:-}
       SERPAPI_KEY: ${SERPAPI_KEY:-}
+      # User and group the app runs as and that owns ./data. 1000 suits most Linux machines;
+      # on a NAS set your own IDs (e.g. Unraid: 99 and 100).
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
     restart: unless-stopped

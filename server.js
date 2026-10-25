@@ -27,9 +27,21 @@ const HISTORY_MAX = 30;
 let history = { searches: [], titles: [] };
 try { history = { ...history, ...JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')) }; } catch {}
 function saveHistory() {
-  fs.mkdirSync(path.dirname(HISTORY_FILE), { recursive: true });
-  fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+  try {
+    fs.mkdirSync(path.dirname(HISTORY_FILE), { recursive: true });
+    fs.writeFileSync(HISTORY_FILE, JSON.stringify(history, null, 2));
+  } catch {} // history is a convenience; keep it in memory if the folder isn't writable
   return history;
+}
+
+// Settings and keys must be saved, so a folder the app can't write to gets a clear message.
+function writeConfig(next) {
+  try {
+    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2));
+  } catch (e) {
+    throw Object.assign(new Error(`Can't save settings to ${path.dirname(CONFIG_FILE)} (${e.code}). Make that folder writable, e.g. sudo chown -R 1000:1000 data`), { status: 500 });
+  }
 }
 // Newest first, without duplicates (searching or opening something again moves it to the top).
 function remember(list, item, same) {
@@ -206,8 +218,7 @@ const routes = {
     if (typeof body.tvdbPin === 'string') next.tvdbPin = body.tvdbPin.trim();
     if (Array.isArray(body.disabledSources)) next.disabledSources = body.disabledSources.filter(s => typeof s === 'string');
     if (Array.isArray(body.posterSize) && body.posterSize.length === 2 && body.posterSize.every(n => Number.isInteger(n) && n >= 100 && n <= 20000)) next.posterSize = body.posterSize;
-    fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(next, null, 2));
+    writeConfig(next);
     config = next;
     cache.clear();
     return keyStatus();
@@ -418,4 +429,10 @@ http.createServer(async (req, res) => {
     res.writeHead(e.status || 500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: e.message }));
   }
-}).listen(PORT, () => console.log(`Artwork Finder running at http://localhost:${PORT}`));
+}).listen(PORT, () => {
+  console.log(`Artwork Finder running at http://localhost:${PORT}`);
+  const dir = path.dirname(CONFIG_FILE);
+  try { fs.accessSync(dir, fs.constants.W_OK); } catch {
+    console.warn(`Warning: can't write to ${dir}, so settings and keys can't be saved. Make it writable, e.g. sudo chown -R 1000:1000 data`);
+  }
+});

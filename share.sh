@@ -10,7 +10,7 @@ set -e
 cd "$(dirname "$0")"
 
 FILES="Dockerfile docker-compose.yml docker-compose.override.yml .dockerignore .gitignore .env.example package.json share.sh LICENSE
-server.js providers.js images.js README.md
+server.js providers.js images.js start.sh README.md
 public/index.html public/app.js public/styles.css public/sources.js"
 
 NAME="artworkfinder-$(date +%Y-%m-%d)"

@@ -72,6 +72,7 @@ Without any keys the app still searches TV shows (through TVmaze) and loads artw
 - **Stop:** `docker compose down`. **Start again:** `docker compose up -d`.
 - **Logs:** `docker compose logs -f`.
 - **Other port:** set `PORT=8080` in `.env` (or edit `docker-compose.yml`), then `docker compose up -d`.
+- **Linux or NAS user IDs:** the app runs as user and group `1000` and makes the `data` folder its own at startup. On a NAS that expects other IDs, set `PUID` and `PGID` in `.env` (find yours with `id`; Unraid uses `99` and `100`).
 
 ### Your data
 
