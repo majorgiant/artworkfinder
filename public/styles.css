@@ -117,7 +117,7 @@ main { padding: 24px; max-width: 1600px; margin: 0 auto; }
 .title-hero .bg { position: absolute; inset: 0; background-size: cover; background-position: center 25%; opacity: .28; filter: blur(2px); }
 .title-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--bg)); }
 .title-hero .inner { position: relative; z-index: 1; display: flex; gap: 28px; max-width: 1600px; margin: 0 auto; }
-.title-hero .cover { width: 180px; flex-shrink: 0; border-radius: var(--radius); box-shadow: 0 10px 40px rgba(0,0,0,.6); }
+.title-hero .cover { width: 180px; aspect-ratio: 2 / 3; object-fit: cover; background: var(--panel-2); flex-shrink: 0; border-radius: var(--radius); box-shadow: 0 10px 40px rgba(0,0,0,.6); }
 .title-hero h1 { margin: 0; font: 54px/1 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 .title-hero .year { color: var(--muted); }
 .title-hero .tagline { font-style: italic; color: var(--muted); margin: 6px 0; }

@@ -378,6 +378,10 @@ async function searchGoogle(query) {
 function drawArtwork() {
   if (pendingRedraw === 'artwork') pendingRedraw = null;
   const body = $('#tabBody');
+  // Rebuilding briefly empties the section; keeping its height stops the browser from pulling
+  // the page up while that happens.
+  const keepY = scrollY;
+  body.style.minHeight = body.offsetHeight + 'px';
   const t = state.title;
   // Type buttons count images from the selected source, and source buttons count images of the
   // selected type, so the numbers always match what clicking will show.
@@ -485,6 +489,8 @@ function drawArtwork() {
     addImages(images, null, true);
   };
   drawGallery();
+  body.style.minHeight = '';
+  if (scrollY !== keepY) scrollTo(0, keepY);
 }
 
 // now: the user asked for these (season posters, collection, Google), so show them right away.
@@ -504,8 +510,11 @@ function addImages(images, focusKind, now = !!focusKind) {
 // ---------------------------------------------------------------------------
 let pendingRedraw = null; // 'artwork' (toolbar + gallery) or 'gallery'
 
+let lastScrollAt = 0;
+
 function viewingGallery() {
   if (!lb.hidden) return true;
+  if (Date.now() - lastScrollAt < 1200) return true; // still scrolling: don't move things now
   const g = $('#gallery');
   return !!g && g.getBoundingClientRect().top < $('.topbar').offsetHeight - 20;
 }
@@ -537,11 +546,12 @@ function showUpdatesButton() {
   document.body.appendChild(b);
 }
 
-let scrollTick = false;
+// Held updates are applied once scrolling has stopped for a moment, if you're above the gallery.
+let scrollIdle = null;
 window.addEventListener('scroll', () => {
-  if (!pendingRedraw || scrollTick) return;
-  scrollTick = true;
-  requestAnimationFrame(() => { scrollTick = false; if (pendingRedraw && !viewingGallery()) applyPendingRedraw(); });
+  lastScrollAt = Date.now();
+  clearTimeout(scrollIdle);
+  scrollIdle = setTimeout(() => { if (pendingRedraw && !viewingGallery()) applyPendingRedraw(); }, 1300);
 }, { passive: true });
 
 // ---------------------------------------------------------------------------
@@ -775,11 +785,13 @@ function drawGallery() {
   const anchor = [...g.querySelectorAll('.card')].find(c => c.getBoundingClientRect().bottom > top);
   const anchorKey = anchor?.dataset.key, anchorY = anchor?.getBoundingClientRect().top;
   const y = scrollY;
+  g.style.minHeight = g.offsetHeight + 'px';
   // The slow-loading sources start on a row of their own, under a heading.
   const firstSlow = shown.findIndex(s => CACHED_THUMBS.has(s.i.source));
   g.innerHTML = shown.map(({ i, group, member }, n) =>
     (n === firstSlow && n > 0 ? `<div class="gallery-divider">${esc(i.source)} <span class="muted">· loads a little slower</span></div>` : '') +
     card(i, n, group, member)).join('');
+  g.style.minHeight = '';
   const again = anchorKey && [...g.querySelectorAll('.card')].find(c => c.dataset.key === anchorKey);
   if (again) scrollBy(0, again.getBoundingClientRect().top - anchorY); else scrollTo(0, y);
   bindCards(g);
