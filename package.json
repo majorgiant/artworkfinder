@@ -1,0 +1,8 @@
+{
+  "name": "artworkfinder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Find posters, textless key art, logos and press assets for movies and TV shows.",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

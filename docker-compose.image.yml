@@ -1,0 +1,25 @@
+# For installing Artwork Finder without downloading the code: this uses the ready-made image
+# from GitHub. Save it as docker-compose.yml in an empty folder and run:
+#
+#   docker compose up -d
+#
+# Update later with:  docker compose pull && docker compose up -d
+services:
+  artworkfinder:
+    image: ghcr.io/majorgiant/artworkfinder:latest
+    container_name: artworkfinder
+    ports:
+      # Change the first number to use another port, e.g. "8080:4321".
+      - "${PORT:-4321}:4321"
+    volumes:
+      # Your keys, settings, history and caches. Keep this folder private.
+      - ./data:/data
+    # Keys can also go in a .env file next to this one, or in the app's Settings
+    # (gear icon). Keys saved in Settings win over these.
+    environment:
+      TMDB_KEY: ${TMDB_KEY:-}
+      FANART_KEY: ${FANART_KEY:-}
+      TVDB_KEY: ${TVDB_KEY:-}
+      TVDB_PIN: ${TVDB_PIN:-}
+      SERPAPI_KEY: ${SERPAPI_KEY:-}
+    restart: unless-stopped

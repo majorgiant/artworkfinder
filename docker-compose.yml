@@ -1,0 +1,20 @@
+services:
+  artworkfinder:
+    build: .
+    image: artworkfinder
+    container_name: artworkfinder
+    ports:
+      # Change the first number to use another port, e.g. "8080:4321".
+      - "${PORT:-4321}:4321"
+    volumes:
+      # Your keys, settings, history and caches. Keep this folder private.
+      - ./data:/data
+    # Keys can also go in a .env file next to this one (see .env.example) or in the
+    # app's Settings. Keys saved in Settings win over these.
+    environment:
+      TMDB_KEY: ${TMDB_KEY:-}
+      FANART_KEY: ${FANART_KEY:-}
+      TVDB_KEY: ${TVDB_KEY:-}
+      TVDB_PIN: ${TVDB_PIN:-}
+      SERPAPI_KEY: ${SERPAPI_KEY:-}
+    restart: unless-stopped

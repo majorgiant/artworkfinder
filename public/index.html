@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artwork Finder</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='5' y='2' width='22' height='28' rx='3' fill='%23f5b942'/><rect x='9' y='6' width='14' height='14' rx='1' fill='%23121214'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/"><span class="brand-mark"></span>Artwork Finder</a>
+    <form class="search" id="searchForm" autocomplete="off">
+      <input id="searchInput" type="search" placeholder="Search a movie or TV show…" aria-label="Search">
+      <button type="submit">Search</button>
+    </form>
+    <nav class="nav">
+      <a href="#/sources">Sources</a>
+      <button class="icon-btn" id="settingsBtn" title="API keys" aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <dialog id="settings">
+    <form method="dialog" id="settingsForm">
+      <h2>API keys</h2>
+      <p class="muted">Keys are saved in <code>config.json</code> on your machine. Streaming services, Plex and Rotten Tomatoes need no key.</p>
+      <label>TMDB API key or Read Access Token
+        <input name="tmdbKey" type="password" placeholder="Leave empty to keep the current key">
+        <small><a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Get one at themoviedb.org → Settings → API</a> · <span data-status="hasTmdb"></span></small>
+      </label>
+      <label>fanart.tv personal API key
+        <input name="fanartKey" type="password" placeholder="Leave empty to keep the current key">
+        <small><a href="https://fanart.tv/get-an-api-key/" target="_blank" rel="noopener">Get one at fanart.tv</a> · <span data-status="hasFanart"></span></small>
+      </label>
+      <label>TheTVDB API key <span class="muted">(optional)</span>
+        <input name="tvdbKey" type="password" placeholder="Leave empty to keep the current key">
+        <input name="tvdbPin" type="password" placeholder="Subscriber PIN, only if your key needs one">
+        <small><a href="https://thetvdb.com/api-information" target="_blank" rel="noopener">Get one at thetvdb.com</a> · <span data-status="hasTvdb"></span></small>
+      </label>
+      <label>SerpAPI key <span class="muted">(optional, for Google Images results)</span>
+        <input name="serpKey" type="password" placeholder="Leave empty to keep the current key">
+        <small><a href="https://serpapi.com/users/sign_up" target="_blank" rel="noopener">Free plan at serpapi.com</a> — each Google search uses one credit · <span data-status="hasSerp"></span></small>
+      </label>
+      <h3 class="settings-heading">Your poster size</h3>
+      <p class="muted">Images are rated Low, Good or Great for this size.</p>
+      <div class="poster-size">
+        <input name="posterW" type="number" min="100" max="20000" step="1" aria-label="Width in pixels"> ×
+        <input name="posterH" type="number" min="100" max="20000" step="1" aria-label="Height in pixels"> px
+      </div>
+      <h3 class="settings-heading">Sources</h3>
+      <p class="muted">Turn off sources you don't need. TMDB still powers search and title details when its artwork is off.</p>
+      <div class="source-toggles" id="sourceToggles"></div>
+      <div class="dialog-actions">
+        <button value="cancel" formnovalidate class="ghost">Close</button>
+        <button value="save" class="primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="lightbox" class="lightbox" hidden></div>
+
+  <script src="/sources.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
