@@ -32,7 +32,7 @@ You need Docker: [Docker Desktop](https://www.docker.com/products/docker-desktop
 Make an empty folder, open a terminal in it and run:
 
 ```bash
-curl -o docker-compose.yml https://raw.githubusercontent.com/majorgiant/artworkfinder/main/docker-compose.image.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/majorgiant/artworkfinder/main/docker-compose.yml
 docker compose up -d
 ```
 
@@ -49,6 +49,8 @@ docker compose up -d --build
 ```
 
 **Update:** `git pull && docker compose up -d --build`
+
+In a copy of the code, `docker-compose.override.yml` is picked up automatically and builds the image from that code. Without it, `docker-compose.yml` downloads the ready-made image.
 
 ### API keys
 

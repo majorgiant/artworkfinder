@@ -1,7 +1,14 @@
+# Artwork Finder. Put this file in an empty folder and run:
+#
+#   docker compose up -d
+#
+# then open http://localhost:4321. Update later with:  docker compose pull && docker compose up -d
+#
+# (In a copy of the code, docker-compose.override.yml is picked up automatically and builds the
+# image from that code instead: docker compose up -d --build)
 services:
   artworkfinder:
-    build: .
-    image: artworkfinder
+    image: ghcr.io/majorgiant/artworkfinder:latest
     container_name: artworkfinder
     ports:
       # Change the first number to use another port, e.g. "8080:4321".
@@ -9,8 +16,8 @@ services:
     volumes:
       # Your keys, settings, history and caches. Keep this folder private.
       - ./data:/data
-    # Keys can also go in a .env file next to this one (see .env.example) or in the
-    # app's Settings. Keys saved in Settings win over these.
+    # Keys can also go in a .env file next to this one (see .env.example) or in the app's
+    # Settings (gear icon). Keys saved in Settings win over these.
     environment:
       TMDB_KEY: ${TMDB_KEY:-}
       FANART_KEY: ${FANART_KEY:-}

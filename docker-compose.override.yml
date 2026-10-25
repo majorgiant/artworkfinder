@@ -1,0 +1,9 @@
+# Docker Compose merges this file into docker-compose.yml automatically. It builds the image from
+# the code in this folder instead of downloading the ready-made one:
+#
+#   docker compose up -d --build
+#
+# Installing without the code? You only need docker-compose.yml.
+services:
+  artworkfinder:
+    build: .
